@@ -1,0 +1,53 @@
+# Source files
+src/
+*.ts
+!*.d.ts
+
+# Development files
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# Documentation source
+docs/
+examples/
+
+# Git
+.git/
+.gitignore
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build cache
+.cache/
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config files
+tsconfig.json
+build.config.ts
+vitest.config.ts
+
+# Include only essential files
+!dist/
+!README.md
+!package.json
+!LICENSE
