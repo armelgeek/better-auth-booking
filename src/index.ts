@@ -72,6 +72,41 @@ export const booking = <O extends BookingOptions>(options: O) => {
 					metadata: z.record(z.string(), z.any()).optional(),
 				}),
 				use: [sessionMiddleware],
+				metadata: {
+					openapi: {
+						tags: ["Bookings"],
+						summary: "Create a new booking",
+						description: "Create a new booking for a service",
+						security: [{ bearerAuth: [] }],
+						responses: {
+							"200": {
+								description: "Booking created successfully",
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												id: { type: "string" },
+												serviceId: { type: "string" },
+												userId: { type: "string" },
+												status: { type: "string", enum: ["pending", "confirmed", "cancelled", "completed"] },
+												startDate: { type: "string", format: "date-time" },
+												endDate: { type: "string", format: "date-time" },
+												participants: { type: "number" },
+												totalPrice: { type: "number" },
+												paymentStatus: { type: "string" },
+												createdAt: { type: "string", format: "date-time" }
+											}
+										}
+									}
+								}
+							},
+							"400": { description: "Bad request - Invalid booking data" },
+							"401": { description: "Unauthorized - Authentication required" },
+							"404": { description: "Service not found" }
+						}
+					}
+				}
 			},
 			async (ctx) => {
 				const { user } = ctx.context.session;
@@ -388,6 +423,60 @@ export const booking = <O extends BookingOptions>(options: O) => {
 					category: z.string().optional(),
 					type: z.string().optional(),
 				}).optional(),
+				metadata: {
+					openapi: {
+						tags: ["Services"],
+						summary: "Get available services",
+						description: "Retrieve a list of available booking services",
+						parameters: [
+							{
+								name: "active",
+								in: "query",
+								description: "Filter by service status",
+								schema: { type: "boolean" }
+							},
+							{
+								name: "category",
+								in: "query",
+								description: "Filter by service category",
+								schema: { type: "string" }
+							},
+							{
+								name: "type",
+								in: "query",
+								description: "Filter by service type",
+								schema: { type: "string" }
+							}
+						],
+						responses: {
+							"200": {
+								description: "List of services",
+								content: {
+									"application/json": {
+										schema: {
+											type: "array",
+											items: {
+												type: "object",
+												properties: {
+													id: { type: "string" },
+													name: { type: "string" },
+													description: { type: "string" },
+													duration: { type: "number" },
+													price: { type: "number" },
+													currency: { type: "string" },
+													type: { type: "string" },
+													category: { type: "string" },
+													maxParticipants: { type: "number" },
+													isActive: { type: "boolean" }
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			},
 			async (ctx) => {
 				const filters = ctx.query || {};
@@ -401,6 +490,48 @@ export const booking = <O extends BookingOptions>(options: O) => {
 			"/booking/services/:id",
 			{
 				method: "GET",
+				metadata: {
+					openapi: {
+						tags: ["Services"],
+						summary: "Get service details",
+						description: "Get detailed information about a specific service",
+						parameters: [
+							{
+								name: "id",
+								in: "path",
+								required: true,
+								description: "Service ID",
+								schema: { type: "string" }
+							}
+						],
+						responses: {
+							"200": {
+								description: "Service details",
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												id: { type: "string" },
+												name: { type: "string" },
+												description: { type: "string" },
+												duration: { type: "number" },
+												price: { type: "number" },
+												currency: { type: "string" },
+												type: { type: "string" },
+												category: { type: "string" },
+												maxParticipants: { type: "number" },
+												isActive: { type: "boolean" },
+												metadata: { type: "object" }
+											}
+										}
+									}
+								}
+							},
+							"404": { description: "Service not found" }
+						}
+					}
+				}
 			},
 			async (ctx) => {
 				const serviceId = ctx.params?.id;
@@ -418,6 +549,275 @@ export const booking = <O extends BookingOptions>(options: O) => {
 				}
 
 				return ctx.json(service);
+			},
+		),
+
+		// Admin endpoints for service management
+		createService: createAuthEndpoint(
+			"/booking/admin/services",
+			{
+				method: "POST",
+				body: z.object({
+					name: z.string().min(1),
+					description: z.string().optional(),
+					duration: z.number().positive(),
+					price: z.number().min(0),
+					currency: z.string().length(3),
+					type: z.enum(["appointment", "event", "rental", "course", "table", "room"]),
+					category: z.string().optional(),
+					maxParticipants: z.number().positive().optional(),
+					requiresApproval: z.boolean().optional(),
+					isActive: z.boolean().optional(),
+					availability: z.record(z.array(z.object({
+						start: z.string(),
+						end: z.string()
+					}))).optional(),
+					metadata: z.record(z.any()).optional(),
+				}),
+				metadata: {
+					openapi: {
+						tags: ["Admin - Services"],
+						summary: "Create a new service",
+						description: "Create a new booking service (admin only)",
+						security: [{ bearerAuth: [] }],
+						responses: {
+							"200": {
+								description: "Service created successfully",
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												id: { type: "string" },
+												name: { type: "string" },
+												description: { type: "string" },
+												duration: { type: "number" },
+												price: { type: "number" },
+												currency: { type: "string" },
+												type: { type: "string", enum: ["appointment", "event", "rental", "class", "table", "room"] },
+												category: { type: "string" },
+												maxParticipants: { type: "number" },
+												requiresApproval: { type: "boolean" },
+												isActive: { type: "boolean" },
+												availability: { type: "object" },
+												metadata: { type: "object" },
+												createdAt: { type: "string", format: "date-time" },
+												updatedAt: { type: "string", format: "date-time" }
+											}
+										}
+									}
+								}
+							},
+							"401": { description: "Unauthorized - Admin access required" },
+							"400": { description: "Bad request - Invalid input data" }
+						}
+					}
+				}
+			},
+			async (ctx) => {
+				// Check if user has admin privileges
+				if (!ctx.context.session?.user?.role || ctx.context.session.user.role !== 'admin') {
+					throw new APIError("FORBIDDEN", {
+						message: "Admin access required",
+					});
+				}
+
+				const serviceData = ctx.body;
+				const serviceId = `service_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+				const newService: BookingService = {
+					id: serviceId,
+					name: serviceData.name,
+					description: serviceData.description || "",
+					duration: serviceData.duration,
+					price: serviceData.price,
+					currency: serviceData.currency,
+					type: serviceData.type,
+					category: serviceData.category || "",
+					maxParticipants: serviceData.maxParticipants || 1,
+					isActive: serviceData.isActive ?? true,
+					metadata: serviceData.metadata || {},
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				};
+
+				const createdService = await ctx.context.adapter.create<BookingService>({
+					model: "bookingService",
+					data: newService,
+				});
+
+				return ctx.json(createdService);
+			},
+		),
+
+		updateService: createAuthEndpoint(
+			"/booking/admin/services/:id/update",
+			{
+				method: "POST",
+				body: z.object({
+					name: z.string().min(1).optional(),
+					description: z.string().optional(),
+					duration: z.number().positive().optional(),
+					price: z.number().min(0).optional(),
+					currency: z.string().length(3).optional(),
+					type: z.enum(["appointment", "event", "rental", "course", "table", "room"]).optional(),
+					category: z.string().optional(),
+					maxParticipants: z.number().positive().optional(),
+					requiresApproval: z.boolean().optional(),
+					isActive: z.boolean().optional(),
+					availability: z.record(z.array(z.object({
+						start: z.string(),
+						end: z.string()
+					}))).optional(),
+					metadata: z.record(z.any()).optional(),
+				}),
+				metadata: {
+					openapi: {
+						tags: ["Admin - Services"],
+						summary: "Update an existing service",
+						description: "Update a booking service (admin only)",
+						security: [{ bearerAuth: [] }],
+						parameters: [
+							{
+								name: "id",
+								in: "path",
+								required: true,
+								description: "Service ID",
+								schema: { type: "string" }
+							}
+						],
+						responses: {
+							"200": {
+								description: "Service updated successfully"
+							},
+							"401": { description: "Unauthorized - Admin access required" },
+							"404": { description: "Service not found" },
+							"400": { description: "Bad request - Invalid input data" }
+						}
+					}
+				}
+			},
+			async (ctx) => {
+				// Check if user has admin privileges
+				if (!ctx.context.session?.user?.role || ctx.context.session.user.role !== 'admin') {
+					throw new APIError("FORBIDDEN", {
+						message: "Admin access required",
+					});
+				}
+
+				const serviceId = ctx.params?.id;
+				if (!serviceId) {
+					throw new APIError("BAD_REQUEST", {
+						message: "Service ID is required",
+					});
+				}
+
+				const updateData = ctx.body;
+				const updatedService = await ctx.context.adapter.update<BookingService>({
+					model: "bookingService",
+					where: [{ field: "id", value: serviceId }],
+					update: {
+						...updateData,
+						updatedAt: new Date(),
+					},
+				});
+
+				if (!updatedService) {
+					throw new APIError("NOT_FOUND", {
+						message: BOOKING_ERROR_CODES.SERVICE_NOT_FOUND,
+					});
+				}
+
+				return ctx.json(updatedService);
+			},
+		),
+
+		deleteService: createAuthEndpoint(
+			"/booking/admin/services/:id/delete",
+			{
+				method: "POST",
+				metadata: {
+					openapi: {
+						tags: ["Admin - Services"],
+						summary: "Delete a service",
+						description: "Delete a booking service (admin only)",
+						security: [{ bearerAuth: [] }],
+						parameters: [
+							{
+								name: "id",
+								in: "path",
+								required: true,
+								description: "Service ID",
+								schema: { type: "string" }
+							}
+						],
+						responses: {
+							"200": {
+								description: "Service deleted successfully",
+								content: {
+									"application/json": {
+										schema: {
+											type: "object",
+											properties: {
+												success: { type: "boolean" },
+												message: { type: "string" }
+											}
+										}
+									}
+								}
+							},
+							"401": { description: "Unauthorized - Admin access required" },
+							"404": { description: "Service not found" },
+							"400": { description: "Bad request - Service has active bookings" }
+						}
+					}
+				}
+			},
+			async (ctx) => {
+				// Check if user has admin privileges
+				if (!ctx.context.session?.user?.role || ctx.context.session.user.role !== 'admin') {
+					throw new APIError("FORBIDDEN", {
+						message: "Admin access required",
+					});
+				}
+
+				const serviceId = ctx.params?.id;
+				if (!serviceId) {
+					throw new APIError("BAD_REQUEST", {
+						message: "Service ID is required",
+					});
+				}
+
+				// Check if service has active bookings
+				const activeBookings = await ctx.context.adapter.findMany<Booking>({
+					model: "booking",
+					where: [
+						{ field: "serviceId", value: serviceId },
+						{ field: "status", value: "confirmed", operator: "in" }
+					],
+				});
+
+				if (activeBookings.length > 0) {
+					throw new APIError("BAD_REQUEST", {
+						message: "Cannot delete service with active bookings",
+					});
+				}
+
+				try {
+					await ctx.context.adapter.delete<BookingService>({
+						model: "bookingService",
+						where: [{ field: "id", value: serviceId }],
+					});
+
+					return ctx.json({ 
+						success: true, 
+						message: "Service deleted successfully" 
+					});
+				} catch (error) {
+					throw new APIError("NOT_FOUND", {
+						message: BOOKING_ERROR_CODES.SERVICE_NOT_FOUND,
+					});
+				}
 			},
 		),
 
