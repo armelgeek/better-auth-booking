@@ -1,6 +1,6 @@
 {
   "name": "better-auth-booking-plugin",
-  "version": "1.0.1-beta.0",
+  "version": "1.0.1-beta.1",
   "description": "A comprehensive booking and reservation system plugin for Better Auth with Stripe integration",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
