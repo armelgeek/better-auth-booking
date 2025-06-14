@@ -1,5 +1,5 @@
 {
-  "name": "@armelgeek/better-auth-booking",
+  "name": "better-auth-booking-plugin",
   "version": "1.0.1-beta.0",
   "description": "A comprehensive booking and reservation system plugin for Better Auth with Stripe integration",
   "main": "dist/index.cjs",
@@ -8,7 +8,7 @@
   "license": "MIT",
   "author": {
     "name": "Armel Wanes",
-    "email": "contact@armelgeek.com"
+    "email": "armelgeek5@gmail.com"
   },
   "keywords": [
     "better-auth",

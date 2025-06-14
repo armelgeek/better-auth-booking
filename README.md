@@ -4,46 +4,90 @@ Un plugin complet de réservation pour Better Auth qui permet de gérer des rés
 
 ## Table des Matières
 
-- [Fonctionnalités](#fonctionnalités)
-- [Installation](#installation)
-- [Configuration](#configuration)
-  - [Configuration de base](#configuration-de-base-sans-paiement)
-  - [Configuration avec Stripe](#configuration-avec-stripe)
-  - [Variables d'environnement Stripe](#variables-denvironnement-stripe)
-  - [Configuration du Webhook Stripe](#configuration-du-webhook-stripe)
-  - [Gestion des services dynamiques](#gestion-des-services-dynamiques)
-- [Utilisation avec Stripe](#utilisation-avec-stripe)
-  - [Flux de paiement complet](#flux-de-paiement-complet)
-  - [Événements automatiques via Webhooks](#événements-automatiques-via-webhooks)
-  - [États de réservation avec paiement](#états-de-réservation-avec-paiement)
-- [Types de Réservations Supportés](#types-de-réservations-supportés)
-  - [🏥 Secteur Médical](#-secteur-médical)
-  - [🍽️ Restauration & Hôtellerie](#️-restauration--hôtellerie)
-  - [🎯 Services & Coaching](#-services--coaching)
-  - [🏋️ Sport & Loisirs](#️-sport--loisirs)
-  - [🚗 Location & Équipements](#-location--équipements)
-  - [🎪 Événements & Spectacles](#-événements--spectacles)
-  - [🎓 Éducation & Formation](#-éducation--formation)
-  - [🏥 Exemples Spécialisés](#-exemples-spécialisés)
-- [Schéma de Base de Données Détaillé](#schéma-de-base-de-données-détaillé)
-  - [Schéma SQL](#schéma-sql-postgresqlmysqlsqlite)
-  - [Schéma Drizzle ORM](#schéma-drizzle-orm-typescript)
-  - [Schéma Prisma](#schéma-prisma)
-  - [Schéma Mongoose](#schéma-mongoose-mongodb)
-  - [Migration SQL](#migration-sql-pour-bases-existantes)
-- [Exemples d'Utilisation Complète](#exemples-dutilisation-complète)
-  - [Configuration complète avec Stripe](#configuration-complète-avec-stripe)
-  - [Système de réservation médical](#système-de-réservation-médical-complet)
-  - [Système de réservation restaurant](#système-de-réservation-restaurant)
-  - [API Frontend avec React](#api-frontend-avec-react)
-- [Déploiement et Production](#déploiement-et-production)
-  - [Checklist de déploiement](#checklist-de-déploiement)
-  - [Sécurité en production](#sécurité-en-production)
-  - [Tests en production](#tests-en-production)
-  - [Analytics et Business Intelligence](#analytics-et-business-intelligence)
-  - [Maintenance et évolution](#maintenance-et-évolution)
-- [API Reference](#api-reference)
-- [Licence](#licence)
+- [Better Booking Plugin](#better-booking-plugin)
+  - [Table des Matières](#table-des-matières)
+  - [Fonctionnalités](#fonctionnalités)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Configuration de base (sans paiement)](#configuration-de-base-sans-paiement)
+    - [Configuration avec Stripe](#configuration-avec-stripe)
+  - [Utilisation](#utilisation)
+    - [1. Gestion des Services](#1-gestion-des-services)
+      - [Créer un service](#créer-un-service)
+      - [Lister les services](#lister-les-services)
+    - [2. Réservations](#2-réservations)
+      - [Créer une réservation (sans paiement)](#créer-une-réservation-sans-paiement)
+      - [Créer une réservation avec paiement Stripe](#créer-une-réservation-avec-paiement-stripe)
+      - [Utiliser Stripe Checkout](#utiliser-stripe-checkout)
+    - [3. Client TypeScript](#3-client-typescript)
+      - [Administration des Services (Admin uniquement)](#administration-des-services-admin-uniquement)
+  - [Webhooks Stripe](#webhooks-stripe)
+  - [Types de Réservations Supportés](#types-de-réservations-supportés)
+    - [🏥 Secteur Médical](#-secteur-médical)
+      - [Consultation Médicale](#consultation-médicale)
+      - [Séance de Kinésithérapie](#séance-de-kinésithérapie)
+    - [🍽️ Restauration \& Hôtellerie](#️-restauration--hôtellerie)
+      - [Réservation de Table](#réservation-de-table)
+      - [Chambre d'Hôtel](#chambre-dhôtel)
+    - [🎯 Services \& Coaching](#-services--coaching)
+      - [Coaching Personnel](#coaching-personnel)
+      - [Cours Particulier](#cours-particulier)
+    - [🏋️ Sport \& Loisirs](#️-sport--loisirs)
+      - [Cours de Fitness](#cours-de-fitness)
+      - [Terrain de Tennis](#terrain-de-tennis)
+    - [🚗 Location \& Équipements](#-location--équipements)
+      - [Location de Véhicule](#location-de-véhicule)
+      - [Salle de Réunion](#salle-de-réunion)
+    - [🎪 Événements \& Spectacles](#-événements--spectacles)
+      - [Concert](#concert)
+      - [Atelier Créatif](#atelier-créatif)
+    - [🎓 Éducation \& Formation](#-éducation--formation)
+      - [Formation Professionnelle](#formation-professionnelle)
+      - [Examen de Certification](#examen-de-certification)
+    - [🏥 Exemples Spécialisés](#-exemples-spécialisés)
+      - [Téléconsultation Médicale](#téléconsultation-médicale)
+      - [Service de Livraison à Domicile](#service-de-livraison-à-domicile)
+  - [API Endpoints](#api-endpoints)
+    - [Services (Consultation)](#services-consultation)
+    - [Services (Administration)](#services-administration)
+      - [Exemple : Créer un service](#exemple--créer-un-service)
+      - [Exemple : Modifier un service](#exemple--modifier-un-service)
+    - [Réservations](#réservations)
+    - [Paiements Stripe](#paiements-stripe)
+  - [Variables d'environnement](#variables-denvironnement)
+  - [Schéma de Base de Données Détaillé](#schéma-de-base-de-données-détaillé)
+    - [Tables principales](#tables-principales)
+      - [Table `booking_service`](#table-booking_service)
+      - [Table `booking`](#table-booking)
+    - [Schéma SQL (PostgreSQL/MySQL/SQLite)](#schéma-sql-postgresqlmysqlsqlite)
+    - [Schéma Drizzle ORM (TypeScript)](#schéma-drizzle-orm-typescript)
+    - [Schéma Prisma](#schéma-prisma)
+    - [Schéma Mongoose (MongoDB)](#schéma-mongoose-mongodb)
+    - [Migration SQL pour bases existantes](#migration-sql-pour-bases-existantes)
+    - [Notes importantes sur le schéma](#notes-importantes-sur-le-schéma)
+  - [Exemples d'Utilisation Complète](#exemples-dutilisation-complète)
+    - [Configuration complète avec Stripe](#configuration-complète-avec-stripe)
+    - [Création d'un système de réservation médical complet](#création-dun-système-de-réservation-médical-complet)
+    - [Système de réservation restaurant](#système-de-réservation-restaurant)
+    - [API Frontend avec React](#api-frontend-avec-react)
+    - [Variables d'environnement complètes](#variables-denvironnement-complètes)
+  - [Déploiement et Production](#déploiement-et-production)
+    - [Checklist de déploiement](#checklist-de-déploiement)
+      - [1. Configuration de l'environnement](#1-configuration-de-lenvironnement)
+      - [2. Configuration Stripe en production](#2-configuration-stripe-en-production)
+      - [3. Optimisations de performance](#3-optimisations-de-performance)
+      - [4. Surveillance et monitoring](#4-surveillance-et-monitoring)
+      - [5. Sauvegardes et récupération](#5-sauvegardes-et-récupération)
+    - [Sécurité en production](#sécurité-en-production)
+      - [1. Validation stricte des données](#1-validation-stricte-des-données)
+      - [2. Chiffrement des données sensibles](#2-chiffrement-des-données-sensibles)
+    - [Tests en production](#tests-en-production)
+      - [1. Tests d'intégration](#1-tests-dintégration)
+      - [2. Tests de charge](#2-tests-de-charge)
+    - [Analytics et Business Intelligence](#analytics-et-business-intelligence)
+    - [Maintenance et évolution](#maintenance-et-évolution)
+      - [1. Migration de données](#1-migration-de-données)
+      - [2. Évolution des API](#2-évolution-des-api)
 
 ## Fonctionnalités
 
@@ -363,7 +407,7 @@ const client = bookingClient({
   token: userToken,
 });
 
-// Utilisation du client
+// Utilisation du client (utilisateur standard)
 const services = await client.getServices();
 const booking = await client.createBooking({
   serviceId: "service_123",
@@ -376,6 +420,55 @@ const bookings = await client.getBookings({
   status: "confirmed",
   from: new Date("2024-12-01"),
   to: new Date("2024-12-31"),
+});
+```
+
+#### Administration des Services (Admin uniquement)
+
+```typescript
+// Client admin avec token administrateur
+const adminClient = bookingClient({
+  baseURL: "https://yourapi.com",
+  token: adminToken, // Token avec droits admin
+});
+
+// Créer un nouveau service
+const newService = await adminClient.createService({
+  name: "Consultation Spécialisée",
+  description: "Consultation avec spécialiste",
+  duration: 45,
+  price: 8000, // 80.00 EUR en centimes
+  currency: "EUR",
+  type: "appointment",
+  category: "medical",
+  maxParticipants: 1,
+  requiresApproval: true,
+  availability: {
+    monday: [{ start: "09:00", end: "17:00" }],
+    wednesday: [{ start: "14:00", end: "18:00" }],
+    friday: [{ start: "09:00", end: "12:00" }]
+  },
+  metadata: {
+    speciality: "Cardiologie",
+    equipment: ["ECG", "Échographe"]
+  }
+});
+
+// Modifier un service existant
+await adminClient.updateService("service_123", {
+  price: 7500, // Nouveau prix
+  availability: {
+    monday: [{ start: "08:00", end: "18:00" }], // Horaires étendus
+    tuesday: [{ start: "08:00", end: "18:00" }]
+  }
+});
+
+// Supprimer un service
+await adminClient.deleteService("service_123");
+
+// Lister tous les services (y compris inactifs) - Admin seulement
+const allServices = await adminClient.getAllServices({
+  includeInactive: true
 });
 ```
 
@@ -1566,11 +1659,53 @@ Ce plugin peut gérer une grande variété de cas d'usage grâce à sa flexibili
 ```
 ## API Endpoints
 
-### Services
-- `GET /api/booking/services` - Lister les services
-- `POST /api/booking/services` - Créer un service
-- `PUT /api/booking/services/:id` - Modifier un service
-- `DELETE /api/booking/services/:id` - Supprimer un service
+### Services (Consultation)
+- `GET /api/booking/services` - Lister les services disponibles
+- `GET /api/booking/services/:id` - Obtenir un service spécifique
+
+### Services (Administration)
+> ⚠️ **Accès Admin requis** : Ces endpoints nécessitent les droits d'administration
+
+- `POST /api/booking/admin/services` - Créer un nouveau service
+- `POST /api/booking/admin/services/:id/update` - Modifier un service existant  
+- `POST /api/booking/admin/services/:id/delete` - Supprimer un service
+
+#### Exemple : Créer un service
+```typescript
+// POST /api/booking/admin/services
+{
+  name: "Consultation Médicale",
+  description: "Consultation générale",
+  duration: 30,
+  price: 5000, // en centimes (50.00 EUR)
+  currency: "EUR",
+  type: "appointment",
+  category: "medical",
+  maxParticipants: 1,
+  requiresApproval: true,
+  isActive: true,
+  availability: {
+    monday: [{ start: "09:00", end: "17:00" }],
+    tuesday: [{ start: "09:00", end: "17:00" }],
+    // ...
+  },
+  metadata: {
+    speciality: "General",
+    room: "Cabinet 1"
+  }
+}
+```
+
+#### Exemple : Modifier un service
+```typescript
+// POST /api/booking/admin/services/service-123/update
+{
+  price: 6000, // Nouveau prix en centimes
+  availability: {
+    monday: [{ start: "08:00", end: "18:00" }] // Nouveaux horaires
+  }
+}
+```
 
 ### Réservations
 - `POST /api/booking/create` - Créer une réservation

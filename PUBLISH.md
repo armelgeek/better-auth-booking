@@ -4,7 +4,7 @@
 
 1. **Compte NPM** : Assurez-vous d'avoir un compte sur [npmjs.com](https://www.npmjs.com)
 2. **Authentification** : Connectez-vous via `npm login`
-3. **Organisation** : Le package sera publié sous `@armelgeek/better-auth-booking`
+3. **Organisation** : Le package sera publié sous `better-auth-booking-plugin`
 
 ## 📋 Checklist avant publication
 
@@ -35,7 +35,7 @@ npm publish
 npm run publish:beta
 
 # Tester l'installation
-npm install @armelgeek/better-auth-booking@beta
+npm install better-auth-booking-plugin
 
 # Si tout fonctionne, publier en stable
 npm publish
@@ -53,7 +53,7 @@ npm publish
 
 ## 📦 Après publication
 
-1. **Vérifier** : Allez sur https://www.npmjs.com/package/@armelgeek/better-auth-booking
+1. **Vérifier** : Allez sur https://www.npmjs.com/package/better-auth-booking-plugin
 2. **Tester** : Installez dans un projet test
 3. **Documentation** : Mettre à jour les liens dans le README si nécessaire
 
@@ -74,13 +74,13 @@ npm version major && npm publish
 
 ```bash
 # Voir les versions publiées
-npm view @armelgeek/better-auth-booking versions --json
+npm view better-auth-booking-plugin versions --json
 
 # Voir les informations du package
-npm view @armelgeek/better-auth-booking
+npm view better-auth-booking-plugin
 
 # Rétracter une version (si erreur)
-npm unpublish @armelgeek/better-auth-booking@1.0.0
+npm unpublish better-auth-booking-plugin@1.0.0
 ```
 
 ## 🎉 Le package est prêt !
